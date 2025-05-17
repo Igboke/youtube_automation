@@ -23,6 +23,7 @@ def list_available_qualities(yt):
 
         if not streams:
             print("  No progressive MP4 streams found for this video.")
+            streams = yt.streams.filter(adaptive=True, file_extension='mp4').order_by('resolution').desc()
             return False
 
         for i, stream in enumerate(streams):
@@ -75,8 +76,53 @@ def download_video_cli(video_url,output_path=".",audio_only=False,quality=None,l
         )
         if list_qualities:
             list_available_qualities(yt)
-            return
+            return True
+        if audio_only:
+            stream = yt.streams.filter(only_audio=True,file_extension="mp4").order_by("abr").desc().first()
+            if not stream:
+                stream = yt.streams.get_audio_only()
+                print("No audio stream found using default.")
+        else:
+            progressive_streams = yt.streams.filter(progressive=True,file_extension="mp4")
+            if not progressive_streams:
+                print("No progressive streams found, falling back to adaptive streams.")
+                adaptive_streams = yt.streams.filter(adaptive=True,file_extension="mp4")
+                if not adaptive_streams:
+                    print("No adaptive streams found.")
+                    return False
+            if quality and progressive_streams:
+                stream = progressive_streams.filter(resolution=quality).first()
+                if stream:
+                    print(f"Selected quality: {quality}")
+            elif quality and adaptive_streams:
+                stream = adaptive_streams.filter(resolution=quality).first()
+                if stream:
+                    print(f"Selected quality: {quality}")
+            else:
+                print("No suitable stream found")
+                print("Try using --list-qualities to see available progressive MP4 options.")
+            return False
+        
+        print(f"Downloading: {stream.mime_type}, Resolution/ABR: {stream.resolution or stream.abr}, FPS: {getattr(stream, 'fps', 'N/A')}")
 
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
+        stream.download(output_path=output_path)
+        return True
+    except RegexMatchError:
+        print("Invalid URL format. Please check the URL and try again.")
+        return False
+    
     except VideoUnavailable:
         print("Video is unavailable.")
+        return False
+    
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return False
+    
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Download YouTube videos from the command line.")
+
+    
 
