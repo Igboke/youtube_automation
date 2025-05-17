@@ -101,7 +101,7 @@ def download_video_cli(video_url,output_path=".",audio_only=False,quality=None,l
             else:
                 print("No suitable stream found")
                 print("Try using --list-qualities to see available progressive MP4 options.")
-            return False
+                return False
         
         print(f"Downloading: {stream.mime_type}, Resolution/ABR: {stream.resolution or stream.abr}, FPS: {getattr(stream, 'fps', 'N/A')}")
 
@@ -126,7 +126,7 @@ if __name__ == "__main__":
     parser.add_argument("url", help="YouTube video URL")
     parser.add_argument("-o", "--output", help="Output directory", default=".")
     parser.add_argument("-a", "--audio", action="store_true", help="Download audio only")
-    parser.add_argument("-q", "--quality", help="Video quality (e.g., 720p, 1080p)")
+    parser.add_argument("-q", "--quality",default=None, help="Video quality (e.g., 720p, 1080p)")
     parser.add_argument("-l", "--list-qualities", action="store_true", help="List available progressive or adaptive. Adaptive videos are shown if no progressive MP4 video qualities and exit. Ignores other download options.")
     args = parser.parse_args()
     download_video_cli(
