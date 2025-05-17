@@ -127,7 +127,14 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", help="Output directory", default=".")
     parser.add_argument("-a", "--audio", action="store_true", help="Download audio only")
     parser.add_argument("-q", "--quality", help="Video quality (e.g., 720p, 1080p)")
-    parser.add_argument("-l", "--list-qualities", action="store_true", help="List available progressive or adaptive. Adaptive videos are shown if no progressive MP4 video qualities and exit. Ignores other download options."
+    parser.add_argument("-l", "--list-qualities", action="store_true", help="List available progressive or adaptive. Adaptive videos are shown if no progressive MP4 video qualities and exit. Ignores other download options.")
+    args = parser.parse_args()
+    download_video_cli(
+        video_url=args.url,
+        output_path=args.output,
+        audio_only=args.audio,
+        quality=args.quality,
+        list_qualities=args.list_qualities
     )
 
     
